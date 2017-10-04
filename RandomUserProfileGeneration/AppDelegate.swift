@@ -7,14 +7,16 @@
 //
 
 import UIKit
+import Alamofire
+import SwiftyJSON
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
-
-    var window: UIWindow?
-
-
+        var window: UIWindow?
+    let notificationKey = Notification.Name("My work is done")
+    
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {
+        
         // Override point for customization after application launch.
         return true
     }
@@ -40,7 +42,60 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     func applicationWillTerminate(_ application: UIApplication) {
         // Called when the application is about to terminate. Save data if appropriate. See also applicationDidEnterBackground:.
     }
+    
+    func application(_ app: UIApplication, open url: URL, options: [UIApplicationOpenURLOptionsKey : Any] = [:]) -> Bool {
+        
+        print(url)
+        guard let code = url.query else {
+            return false
+        }
+        
+        let authCode = code.components(separatedBy: "=")
+        
+        getAccessToken(str:authCode[1])
+            return true
+    }
+    
+    func getAccessToken(str:String) {
+        
+        let url = try! "https://www.googleapis.com/oauth2/v4/token".asURL()
+        
+        let params: [String: Any] = ["code": str,
+                                     "client_id": "571036347521-b401a5oiaala7q1b3mb29rncg6034tp4.apps.googleusercontent.com",
+                                     "redirect_uri": "com.fullCreative.RandomUserProfileGeneration:/oauth2redirect",
+                                     "grant_type": "authorization_code"
+        ]
+        
+        Alamofire.request(url, method: .post, parameters: params, encoding: URLEncoding.httpBody, headers: ["Content-Type": "application/x-www-form-urlencoded"]).responseData { (
+            response) in
+            switch response.result {
+                
+            case .success:
+                
+                if let value = response.result.value {
+                    
+                    let json = JSON(value)
+                    print(json)
+                    let tokenToAccess = json["access_token"]
+                    if let accessToken = tokenToAccess.string{
+                        print(accessToken)
+                        let userDefaults = UserDefaults.standard
+                        userDefaults.set(accessToken, forKey: "token")
+                        UserDefaults.standard.synchronize()
+                    }
+                    
+                    NotificationCenter.default.post(name: self.notificationKey, object: self)
+                    
+                }
+            case .failure(let error):
+                print(error)
+            }
+            
+        }
+    }
+    
+
+    }
 
 
-}
 
