@@ -28,12 +28,16 @@ class UserInfoViewController: UIViewController {
 
     override func viewWillAppear(_ animated: Bool) {
         
-        guard let details = UserDefaults.standard.dictionary(forKey: "userInfo"), !details.isEmpty else {
+        guard let details = UserDefaults.standard.array(forKey: "userInfo"), !details.isEmpty else {
             
             return
         }
         
-        if let imageUrl = details["picture"] {
+        guard let userDetails = details[myIndex] as? NSDictionary else {
+            return
+        }
+      
+           if let imageUrl = userDetails["picture"] {
             if let url =  URL(string: imageUrl as! String) {
             let data = try? Data(contentsOf: url)
                 
@@ -57,16 +61,17 @@ class UserInfoViewController: UIViewController {
                 }
             }
         }
-        if let userEmail = details["emailId"] {
+        
+        if let userEmail = userDetails["emailId"] {
             emailId.text = userEmail as? String
         }
         
-        if let cell = details["mobileNumber"] {
+        if let cell = userDetails["mobileNumber"] {
             mobileNo.text = cell as? String
             
         }
         
-        if let gender = details["gender"] {
+        if let gender = userDetails["gender"] {
             sex.text = gender as? String
         }
            }

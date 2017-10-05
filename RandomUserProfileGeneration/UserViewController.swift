@@ -105,7 +105,7 @@ class UserViewController: UIViewController, UITableViewDataSource, UITableViewDe
                     
                     self.arrayOfUsers.append(self.userDetails)
                     print(self.arrayOfUsers)
-                    UserDefaults.standard.set(self.userDetails, forKey: "userInfo")
+                    UserDefaults.standard.set(self.arrayOfUsers, forKey: "userInfo")
                     
                 }
                 
